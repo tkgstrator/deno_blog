@@ -8,7 +8,7 @@ import {
 } from "https://deno.land/std@0.149.0/testing/asserts.ts";
 import { fromFileUrl, join } from "https://deno.land/std@0.149.0/path/mod.ts";
 
-const BLOG_URL = new URL("./testdata/main.js", import.meta.url).href;
+const BLOG_URL = new URL("./testdata/main.ts", import.meta.url).href;
 const TESTDATA_PATH = fromFileUrl(new URL("./testdata/", import.meta.url));
 const BLOG_SETTINGS = await configureBlog(BLOG_URL, false, {
   author: "The author",
@@ -67,7 +67,7 @@ Deno.test("posts/ first", async () => {
   assertStringIncludes(body, `© ${new Date().getFullYear()} The author`);
   assertStringIncludes(
     body,
-    `<time dateTime="2022-03-20T00:00:00.000Z">20 Mar 2022</time>`,
+    `<time dateTime="2022-03-20T00:00:00.000Z">20 Mar 2022</time>`
   );
   assertStringIncludes(body, `<img src="first/hello.png" />`);
   assertStringIncludes(body, `<p>Lorem Ipsum is simply dummy text`);
@@ -86,7 +86,7 @@ Deno.test("posts/ second", async () => {
   assertStringIncludes(body, `© ${new Date().getFullYear()} The author`);
   assertStringIncludes(
     body,
-    `<time dateTime="2022-05-02T00:00:00.000Z">2 May 2022</time>`,
+    `<time dateTime="2022-05-02T00:00:00.000Z">2 May 2022</time>`
   );
   assertStringIncludes(body, `<img src="second/hello2.png" />`);
   assertStringIncludes(body, `<p>Lorem Ipsum is simply dummy text`);
@@ -104,7 +104,7 @@ Deno.test("posts/ third", async () => {
   assertStringIncludes(body, `© ${new Date().getFullYear()} The author`);
   assertStringIncludes(
     body,
-    `<time dateTime="2022-08-19T00:00:00.000Z">19 Aug 2022</time>`,
+    `<time dateTime="2022-08-19T00:00:00.000Z">19 Aug 2022</time>`
   );
   assertStringIncludes(body, `<iframe width="560" height="315"`);
   assertStringIncludes(body, `<p>Lorem Ipsum is simply dummy text`);
@@ -121,7 +121,7 @@ Deno.test("posts/ trailing slash redirects", async () => {
 Deno.test("redirect map", async () => {
   {
     const resp = await testHandler(
-      new Request("https://blog.deno.dev/second.html"),
+      new Request("https://blog.deno.dev/second.html")
     );
     assert(resp);
     assertEquals(resp.status, 307);
@@ -130,7 +130,7 @@ Deno.test("redirect map", async () => {
   }
   {
     const resp = await testHandler(
-      new Request("https://blog.deno.dev/to_second"),
+      new Request("https://blog.deno.dev/to_second")
     );
     assert(resp);
     assertEquals(resp.status, 307);
@@ -139,7 +139,7 @@ Deno.test("redirect map", async () => {
   }
   {
     const resp = await testHandler(
-      new Request("https://blog.deno.dev/to_second_with_slash"),
+      new Request("https://blog.deno.dev/to_second_with_slash")
     );
     assert(resp);
     assertEquals(resp.status, 307);
@@ -151,7 +151,7 @@ Deno.test("redirect map", async () => {
 Deno.test("static files in posts/ directory", async () => {
   {
     const resp = await testHandler(
-      new Request("https://blog.deno.dev/first/hello.png"),
+      new Request("https://blog.deno.dev/first/hello.png")
     );
     assert(resp);
     assertEquals(resp.status, 200);
@@ -159,14 +159,12 @@ Deno.test("static files in posts/ directory", async () => {
     const bytes = new Uint8Array(await resp.arrayBuffer());
     assertEquals(
       bytes,
-      await Deno.readFile(
-        join(TESTDATA_PATH, "./posts/first/hello.png"),
-      ),
+      await Deno.readFile(join(TESTDATA_PATH, "./posts/first/hello.png"))
     );
   }
   {
     const resp = await testHandler(
-      new Request("https://blog.deno.dev/second/hello2.png"),
+      new Request("https://blog.deno.dev/second/hello2.png")
     );
     assert(resp);
     assertEquals(resp.status, 200);
@@ -174,12 +172,7 @@ Deno.test("static files in posts/ directory", async () => {
     const bytes = new Uint8Array(await resp.arrayBuffer());
     assertEquals(
       bytes,
-      await Deno.readFile(
-        join(
-          TESTDATA_PATH,
-          "./posts/second/hello2.png",
-        ),
-      ),
+      await Deno.readFile(join(TESTDATA_PATH, "./posts/second/hello2.png"))
     );
   }
 });
@@ -190,12 +183,7 @@ Deno.test("static files in root directory", async () => {
   assertEquals(resp.status, 200);
   assertEquals(resp.headers.get("content-type"), "image/png");
   const bytes = new Uint8Array(await resp.arrayBuffer());
-  assertEquals(
-    bytes,
-    await Deno.readFile(
-      join(TESTDATA_PATH, "./cat.png"),
-    ),
-  );
+  assertEquals(bytes, await Deno.readFile(join(TESTDATA_PATH, "./cat.png")));
 });
 
 Deno.test("RSS feed", async () => {
@@ -204,7 +192,7 @@ Deno.test("RSS feed", async () => {
   assertEquals(resp.status, 200);
   assertEquals(
     resp.headers.get("content-type"),
-    "application/atom+xml; charset=utf-8",
+    "application/atom+xml; charset=utf-8"
   );
   const body = await resp.text();
   assertStringIncludes(body, `<title>Test blog</title>`);
