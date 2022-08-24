@@ -129,14 +129,14 @@ export function Index({ state, posts, page }: IndexProps) {
             <a
               class="px-2 py-1 border border-transparent hover:border-gray-500 rounded-md text-blue-500 duration-200"
               rel="next"
-              href={`/?page=${Math.max(currentPageId - 1, 0)}`}
+              href={`?page=${Math.max(currentPageId - 1, 0)}`}
             >
               Previous
             </a>
             <a
               class="px-2 py-1 border border-transparent hover:border-gray-500 rounded-md text-blue-500 duration-200"
               rel="next"
-              href={`/?page=${Math.min(currentPageId + 1, maxPageCounts - 1)}`}
+              href={`?page=${Math.min(currentPageId + 1, maxPageCounts - 1)}`}
             >
               Next
             </a>

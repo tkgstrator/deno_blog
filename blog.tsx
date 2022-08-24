@@ -255,9 +255,10 @@ async function loadPost(postsDirectory: string, path: string) {
     // pathname in front matter.
     pathname: data.get("pathname") ?? pathname,
     // Note: no error when publish_date is wrong or missed
-    publishDate: data.get("publish_date") instanceof Date
-      ? data.get("publish_date")!
-      : new Date(),
+    publishDate:
+      data.get("publish_date") instanceof Date
+        ? data.get("publish_date")!
+        : new Date(),
     snippet,
     markdown: content,
     coverHtml: data.get("cover_html"),
@@ -341,7 +342,7 @@ export async function handler(req: Request, ctx: BlogContext) {
 
   if (pathname === "/") {
     const { searchParams } = new URL(req.url);
-    const pageId: number = parseInt(searchParams.get("page") ?? 0, 10);
+    const pageId: number = parseInt(searchParams.get("page") ?? "0", 10);
 
     return html({
       ...sharedHtmlOptions,
