@@ -20,16 +20,25 @@ const socialAppIcons = new Map([
 interface IndexProps {
   state: BlogState;
   posts: Map<string, Post>;
+  page: number | undefined;
 }
 
-export function Index({ state, posts }: IndexProps) {
-  const postIndex = [];
-  for (const [_key, post] of posts.entries()) {
-    postIndex.push(post);
-  }
-  postIndex.sort(
-    (a, b) => (b.publishDate?.getTime() ?? 0) - (a.publishDate?.getTime() ?? 0),
-  );
+export function Index({ state, posts, page }: IndexProps) {
+  const limit: number = state.entries ?? 20;
+  const offset: number = (page ?? 0) * limit;
+
+  const currentPageId: number = page ?? 0;
+  const maxPageCounts: number = Math.ceil(posts.size / limit);
+  const nextPageIsAvailable: boolean = currentPageId + 1 < maxPageCounts;
+  const prevPageIsAvailable: boolean = currentPageId != 0;
+
+  /* Maybe need filter posts with tags before props */
+  const postIndex = [...posts.values()]
+    .sort(
+      (a, b) =>
+        (b.publishDate?.getTime() ?? 0) - (a.publishDate?.getTime() ?? 0)
+    )
+    .slice(offset, offset + limit);
 
   return (
     <div class="home">
@@ -76,7 +85,7 @@ export function Index({ state, posts }: IndexProps) {
                     Icon = IconEmail;
                   } else {
                     const icon = socialAppIcons.get(
-                      url.hostname.replace(/^www\./, ""),
+                      url.hostname.replace(/^www\./, "")
                     );
                     if (icon) {
                       Icon = icon;
@@ -87,9 +96,9 @@ export function Index({ state, posts }: IndexProps) {
                     <a
                       class="relative flex items-center justify-center w-8 h-8 rounded-full bg-gray-600/10 dark:bg-gray-400/10 text-gray-700 dark:text-gray-400 hover:bg-gray-600/15 dark:hover:bg-gray-400/15 hover:text-black dark:hover:text-white transition-colors group"
                       href={link.url}
-                      rel={link.target === "_blank"
-                        ? "noopener noreferrer"
-                        : ""}
+                      rel={
+                        link.target === "_blank" ? "noopener noreferrer" : ""
+                      }
                       target={link.target ?? "_self"}
                     >
                       {link.icon ? link.icon : <Icon />}
@@ -115,19 +124,40 @@ export function Index({ state, posts }: IndexProps) {
           ))}
         </div>
 
+        <div class="paginate-container text-center my-4">
+          <div>
+            <a
+              class="px-2 py-1 border border-transparent hover:border-gray-500 rounded-md text-blue-500 duration-200"
+              rel="next"
+              href={`/?page=${Math.max(currentPageId - 1, 0)}`}
+            >
+              Previous
+            </a>
+            <a
+              class="px-2 py-1 border border-transparent hover:border-gray-500 rounded-md text-blue-500 duration-200"
+              rel="next"
+              href={`/?page=${Math.min(currentPageId + 1, maxPageCounts - 1)}`}
+            >
+              Next
+            </a>
+          </div>
+        </div>
+
         {state.footer || <Footer author={state.author} />}
       </div>
     </div>
   );
 }
 
-function PostCard(
-  { post, dateStyle, lang }: {
-    post: Post;
-    dateStyle?: DateStyle;
-    lang?: string;
-  },
-) {
+function PostCard({
+  post,
+  dateStyle,
+  lang,
+}: {
+  post: Post;
+  dateStyle?: DateStyle;
+  lang?: string;
+}) {
   return (
     <div class="pt-12 first:pt-0">
       <h3 class="text-2xl font-bold">
@@ -137,13 +167,8 @@ function PostCard(
       </h3>
       <Tags tags={post.tags} />
       <p class="text-gray-500/80">
-        {(post.author) &&
-          <span>By {post.author || ""} at{" "}</span>}
-        <PrettyDate
-          date={post.publishDate}
-          dateStyle={dateStyle}
-          lang={lang}
-        />
+        {post.author && <span>By {post.author || ""} at </span>}
+        <PrettyDate date={post.publishDate} dateStyle={dateStyle} lang={lang} />
       </p>
       <p class="mt-3 text-gray-600 dark:text-gray-400">{post.snippet}</p>
       <p class="mt-3">
@@ -204,7 +229,7 @@ export function PostPage({ post, state }: PostPageProps) {
           <Tags tags={post.tags} />
           <p class="mt-1 text-gray-500">
             {(post.author || state.author) && (
-              <span>By {post.author || state.author} at{" "}</span>
+              <span>By {post.author || state.author} at </span>
             )}
             <PrettyDate
               date={post.publishDate}
@@ -234,8 +259,7 @@ function Footer(props: { author?: string }) {
     <footer class="mt-20 pb-16 lt-sm:pb-8 lt-sm:mt-16">
       <p class="flex items-center gap-2.5 text-gray-400/800 dark:text-gray-500/800 text-sm">
         <span>
-          &copy; {new Date().getFullYear()} {props.author} &middot; Powered by
-          {" "}
+          &copy; {new Date().getFullYear()} {props.author} &middot; Powered by{" "}
           <a
             class="inline-flex items-center gap-1 underline hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
             href="https://deno.land/x/blog"
@@ -258,7 +282,9 @@ function Footer(props: { author?: string }) {
 function Tooltip({ children }: { children: string }) {
   return (
     <div
-      className={"absolute top-10 px-3 h-8 !leading-8 bg-black/80 text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity"}
+      className={
+        "absolute top-10 px-3 h-8 !leading-8 bg-black/80 text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity"
+      }
     >
       <span
         className="block absolute text-black/80"
@@ -283,29 +309,29 @@ function Tooltip({ children }: { children: string }) {
   );
 }
 
-function PrettyDate(
-  { date, dateStyle, lang }: {
-    date: Date;
-    dateStyle?: DateStyle;
-    lang?: string;
-  },
-) {
+function PrettyDate({
+  date,
+  dateStyle,
+  lang,
+}: {
+  date: Date;
+  dateStyle?: DateStyle;
+  lang?: string;
+}) {
   const formatted = date.toLocaleDateString(lang ?? "en-US", { dateStyle });
   return <time dateTime={date.toISOString()}>{formatted}</time>;
 }
 
 function Tags({ tags }: { tags?: string[] }) {
-  return tags && tags.length > 0
-    ? (
-      <section class="flex gap-x-2 flex-wrap">
-        {tags?.map((tag) => (
-          <a class="text-bluegray-500 font-bold" href={`/?tag=${tag}`}>
-            #{tag}
-          </a>
-        ))}
-      </section>
-    )
-    : null;
+  return tags && tags.length > 0 ? (
+    <section class="flex gap-x-2 flex-wrap">
+      {tags?.map((tag) => (
+        <a class="text-bluegray-500 font-bold" href={`/?tag=${tag}`}>
+          #{tag}
+        </a>
+      ))}
+    </section>
+  ) : null;
 }
 
 function IconRssFeed() {

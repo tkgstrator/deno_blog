@@ -133,7 +133,7 @@ function composeMiddlewares(state: BlogState) {
   return (
     req: Request,
     connInfo: ConnInfo,
-    inner: (req: Request, ctx: BlogContext) => Promise<Response>,
+    inner: (req: Request, ctx: BlogContext) => Promise<Response>
   ) => {
     const mws = state.middlewares?.reverse();
 
@@ -164,7 +164,7 @@ function composeMiddlewares(state: BlogState) {
 export async function configureBlog(
   url: string,
   isDev: boolean,
-  settings?: BlogSettings,
+  settings?: BlogSettings
 ): Promise<BlogState> {
   let directory;
 
@@ -191,9 +191,7 @@ async function loadContent(blogDirectory: string, isDev: boolean) {
   const postsDirectory = join(blogDirectory, "posts");
 
   // TODO(@satyarohith): not efficient for large number of posts.
-  for await (
-    const entry of walk(postsDirectory)
-  ) {
+  for await (const entry of walk(postsDirectory)) {
     if (entry.isFile && entry.path.endsWith(".md")) {
       await loadPost(postsDirectory, entry.path);
     }
@@ -231,13 +229,13 @@ async function loadPost(postsDirectory: string, path: string) {
   // Remove .md extension.
   pathname = pathname.slice(0, -3);
 
-  const { body: content, attrs: _data } = frontMatter<Record<string, unknown>>(
-    contents,
-  );
+  const { body: content, attrs: _data } =
+    frontMatter<Record<string, unknown>>(contents);
 
   const data = recordGetter(_data);
 
-  let snippet: string | undefined = data.get("snippet") ??
+  let snippet: string | undefined =
+    data.get("snippet") ??
     data.get("abstract") ??
     data.get("summary") ??
     data.get("description");
@@ -271,19 +269,18 @@ async function loadPost(postsDirectory: string, path: string) {
   console.log("Load: ", post.pathname);
 }
 
-export async function handler(
-  req: Request,
-  ctx: BlogContext,
-) {
+export async function handler(req: Request, ctx: BlogContext) {
   const { state: blogState } = ctx;
   const { pathname, searchParams } = new URL(req.url);
   const canonicalUrl = blogState.canonicalUrl || new URL(req.url).origin;
-  const ogImage = typeof blogState.ogImage !== "string"
-    ? blogState.ogImage?.url
-    : blogState.ogImage;
-  const twitterCard = typeof blogState.ogImage !== "string"
-    ? blogState.ogImage?.twitterCard
-    : "summary_large_image";
+  const ogImage =
+    typeof blogState.ogImage !== "string"
+      ? blogState.ogImage?.url
+      : blogState.ogImage;
+  const twitterCard =
+    typeof blogState.ogImage !== "string"
+      ? blogState.ogImage?.twitterCard
+      : "summary_large_image";
 
   if (pathname === "/feed") {
     return serveRSS(req, blogState, POSTS);
@@ -313,9 +310,7 @@ export async function handler(
     colorScheme: blogState.theme ?? "auto",
     lang: blogState.lang ?? "en",
     scripts: IS_DEV ? [{ src: "/hmr.js" }] : undefined,
-    links: [
-      { href: canonicalUrl, rel: "canonical" },
-    ],
+    links: [{ href: canonicalUrl, rel: "canonical" }],
   };
 
   if (typeof blogState.favicon === "string") {
@@ -345,11 +340,14 @@ export async function handler(
   }
 
   if (pathname === "/") {
+    const { searchParams } = new URL(req.url);
+    const pageId: number = parseInt(searchParams.get("page") ?? 0, 10);
+
     return html({
       ...sharedHtmlOptions,
       title: blogState.title ?? "My Blog",
       meta: {
-        "description": blogState.description,
+        description: blogState.description,
         "og:title": blogState.title,
         "og:description": blogState.description,
         "og:image": ogImage ?? blogState.cover,
@@ -358,13 +356,12 @@ export async function handler(
         "twitter:image": ogImage ?? blogState.cover,
         "twitter:card": ogImage ? twitterCard : undefined,
       },
-      styles: [
-        ...(blogState.style ? [blogState.style] : []),
-      ],
+      styles: [...(blogState.style ? [blogState.style] : [])],
       body: (
         <Index
           state={blogState}
           posts={filterPosts(POSTS, searchParams)}
+          page={pageId}
         />
       ),
     });
@@ -376,7 +373,7 @@ export async function handler(
       ...sharedHtmlOptions,
       title: post.title,
       meta: {
-        "description": post.snippet,
+        description: post.snippet,
         "og:title": post.title,
         "og:description": post.snippet,
         "og:image": post.ogImage,
@@ -412,7 +409,7 @@ export async function handler(
 function serveRSS(
   req: Request,
   state: BlogState,
-  posts: Map<string, Post>,
+  posts: Map<string, Post>
 ): Response {
   const url = state.canonicalUrl
     ? new URL(state.canonicalUrl)
@@ -467,14 +464,14 @@ export function ga(gaKey: string): BlogMiddleware {
 
   return async function (
     request: Request,
-    ctx: BlogContext,
+    ctx: BlogContext
   ): Promise<Response> {
     let err: undefined | Error;
     let res: undefined | Response;
 
     const start = performance.now();
     try {
-      res = await ctx.next() as Response;
+      res = (await ctx.next()) as Response;
     } catch (e) {
       err = e as Error;
       res = new Response(`Internal server error: ${err.message}`, {
@@ -508,7 +505,7 @@ export function redirects(redirectMap: Record<string, string>): BlogMiddleware {
       return new Response(null, {
         status: 307,
         headers: {
-          "location": maybeRedirect,
+          location: maybeRedirect,
         },
       });
     }
@@ -523,16 +520,13 @@ export function redirects(redirectMap: Record<string, string>): BlogMiddleware {
   };
 }
 
-function filterPosts(
-  posts: Map<string, Post>,
-  searchParams: URLSearchParams,
-) {
+function filterPosts(posts: Map<string, Post>, searchParams: URLSearchParams) {
   const tag = searchParams.get("tag");
   if (!tag) {
     return posts;
   }
   return new Map(
-    Array.from(posts.entries()).filter(([, p]) => p.tags?.includes(tag)),
+    Array.from(posts.entries()).filter(([, p]) => p.tags?.includes(tag))
   );
 }
 
