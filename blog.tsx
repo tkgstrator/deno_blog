@@ -381,7 +381,7 @@ export async function handler(req: Request, ctx: BlogContext) {
         "twitter:title": post.title,
         "twitter:description": post.snippet,
         "twitter:image": post.ogImage ?? ogImage ?? blogState.cover,
-        "twitter:card": post.ogImage ? twitterCard : undefined,
+        "twitter:card": post.ogImage ?? twitterCard,
       },
       styles: [
         gfm.CSS,
