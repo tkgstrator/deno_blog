@@ -49,7 +49,7 @@ export function Index({ state, posts, page }: IndexProps) {
             backgroundImage: state.cover ? `url(${state.cover})` : undefined,
           }}
         >
-          <div class="max-w-screen-sm h-full px-6 mx-auto flex flex-col items-center justify-center">
+          <div class="max-w-screen-md h-full px-6 mx-auto flex flex-col items-center justify-center">
             {state.avatar && (
               <a
                 href="/"
@@ -112,7 +112,7 @@ export function Index({ state, posts, page }: IndexProps) {
         </header>
       )}
 
-      <div class="max-w-screen-sm px-6 mx-auto">
+      <div class="max-w-screen-md px-6 mx-auto">
         <div class="pt-16 lt-sm:pt-12 border-t-1 border-gray-300/80">
           {postIndex.map((post) => (
             <PostCard
@@ -221,7 +221,7 @@ export function PostPage({ post, state }: PostPageProps) {
   return (
     <div className={`post ${post.pathname.substring(1)}`}>
       {state.showHeaderOnPostPage && state.header}
-      <div class="max-w-screen-sm px-6 pt-8 mx-auto">
+      <div class="max-w-screen-md px-6 pt-8 mx-auto">
         <div class="pb-16">
           <a
             href="/"
