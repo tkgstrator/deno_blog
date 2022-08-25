@@ -377,10 +377,10 @@ export async function handler(req: Request, ctx: BlogContext) {
         description: post.snippet,
         "og:title": post.title,
         "og:description": post.snippet,
-        "og:image": post.ogImage,
+        "og:image": post.ogImage ?? ogImage ?? blogState.cover,
         "twitter:title": post.title,
         "twitter:description": post.snippet,
-        "twitter:image": post.ogImage,
+        "twitter:image": post.ogImage ?? ogImage ?? blogState.cover,
         "twitter:card": post.ogImage ? twitterCard : undefined,
       },
       styles: [
