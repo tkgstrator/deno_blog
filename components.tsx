@@ -30,7 +30,7 @@ export function Index({ state, posts, page }: IndexProps) {
   const currentPageId: number = page ?? 0;
   const maxPageCounts: number = Math.ceil(posts.size / limit);
   const nextPageIsAvailable: boolean = currentPageId + 1 < maxPageCounts;
-  const prevPageIsAvailable: boolean = currentPageId != 0;
+  const prevPageIsAvailable: boolean = !(currentPageId == 0);
 
   /* Maybe need filter posts with tags before props */
   const postIndex = [...posts.values()]
@@ -126,20 +126,45 @@ export function Index({ state, posts, page }: IndexProps) {
 
         <div class="paginate-container text-center my-4">
           <div>
-            <a
-              class="px-2 py-1 border border-transparent hover:border-gray-500 rounded-md text-blue-500 duration-200"
-              rel="next"
-              href={`?page=${Math.max(currentPageId - 1, 0)}`}
-            >
-              Previous
-            </a>
-            <a
-              class="px-2 py-1 border border-transparent hover:border-gray-500 rounded-md text-blue-500 duration-200"
-              rel="next"
-              href={`?page=${Math.min(currentPageId + 1, maxPageCounts - 1)}`}
-            >
-              Next
-            </a>
+            {(() => {
+              if (!prevPageIsAvailable) {
+                return (
+                  <span class="px-2 py-1 border border-transparent rounded-md text-gray-500 duration-200 cursor-default">
+                    Previous
+                  </span>
+                );
+              } else {
+                return (
+                  <a
+                    class="px-2 py-1 border border-transparent rounded-md text-blue-500 duration-200"
+                    href={`?page=${Math.max(currentPageId - 1, 0)}`}
+                  >
+                    Previous
+                  </a>
+                );
+              }
+            })()}
+            {(() => {
+              if (!nextPageIsAvailable) {
+                return (
+                  <span class="px-2 py-1 border border-transparent rounded-md text-gray-500 duration-200 cursor-default">
+                    Next
+                  </span>
+                );
+              } else {
+                return (
+                  <a
+                    class="px-2 py-1 border border-transparent rounded-md text-blue-500 duration-200"
+                    href={`?page=${Math.min(
+                      currentPageId + 1,
+                      maxPageCounts - 1
+                    )}`}
+                  >
+                    Next
+                  </a>
+                );
+              }
+            })()}
           </div>
         </div>
 
